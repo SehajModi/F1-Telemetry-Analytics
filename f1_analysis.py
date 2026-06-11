@@ -1,6 +1,5 @@
 import fastf1
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
 import numpy as np
 
 fastf1.Cache.enable_cache('f1_cache')
@@ -8,64 +7,50 @@ fastf1.Cache.enable_cache('f1_cache')
 session = fastf1.get_session(2025, 'Bahrain', 'Q')
 session.load()
 
-ver = session.laps.pick_drivers('VER').pick_fastest()
-nor = session.laps.pick_drivers('NOR').pick_fastest()
+ver_laps = session.laps.pick_drivers('VER').pick_quicklaps()
+ver_laps = ver_laps.copy()
+ver_laps['LapTimeSeconds'] = ver_laps['LapTime'].dt.total_seconds()
 
-ver_tel = ver.get_telemetry().add_distance()
-nor_tel = nor.get_telemetry().add_distance()
+q1 = ver_laps[ver_laps['Session'] == 'Q1'] if 'Session' in ver_laps.columns else ver_laps[ver_laps['LapNumber'] <= 12]
 
-# Interpolate NOR onto VER's distance axis
-from scipy.interpolate import interp1d
+fig, ax = plt.subplots(figsize=(14, 7), facecolor='#1a1a2e')
+ax.set_facecolor('#0d0d1a')
+ax.set_title("Max Verstappen — Bahrain GP 2025\nQualifying Lap Time Evolution",
+             color='white', fontsize=14, fontweight='bold')
 
-ver_dist = ver_tel['Distance'].values
-nor_dist = nor_tel['Distance'].values
-nor_time = nor_tel['SessionTime'].dt.total_seconds().values
-ver_time = ver_tel['SessionTime'].dt.total_seconds().values
+colors = {'Q1': '#888888', 'Q2': '#00d2ff', 'Q3': '#ffd700'}
 
-# Interpolate
-nor_interp = interp1d(nor_dist, nor_time, bounds_error=False, fill_value='extrapolate')
-nor_time_on_ver = nor_interp(ver_dist)
+for i, (compound_color, lap) in enumerate(zip(
+    ['#aaaaaa'] * len(ver_laps), ver_laps.itertuples()
+)):
+    pass
 
-# Delta: positive = VER ahead, negative = NOR ahead
-delta = ver_time - nor_time_on_ver
-# Normalize to 0 at start
-delta = delta - delta[0]
+# Simple approach - plot all laps in order
+lap_nums = range(1, len(ver_laps) + 1)
+lap_times = ver_laps['LapTimeSeconds'].values
+best = min(lap_times)
 
-ver_speed = ver_tel['Speed'].values
+ax.plot(lap_nums, lap_times, color='#00d2ff', linewidth=2, marker='o',
+        markersize=6, markerfacecolor='white', markeredgecolor='#00d2ff')
 
-# Plot
-fig = plt.figure(figsize=(16, 8), facecolor='#1a1a2e')
-fig.suptitle("VER vs NOR — Bahrain GP 2025 Q\nTime Delta & Speed Trace",
-             color='white', fontsize=15, fontweight='bold')
+# Highlight fastest lap
+fastest_idx = np.argmin(lap_times)
+ax.scatter(fastest_idx + 1, lap_times[fastest_idx], color='#ffd700',
+           s=150, zorder=5, label=f'Fastest: {best:.3f}s')
 
-gs = gridspec.GridSpec(2, 1, hspace=0.15, height_ratios=[1, 2])
+# Annotate each point
+for i, t in enumerate(lap_times):
+    ax.annotate(f'{t:.2f}s', (i+1, t), textcoords='offset points',
+                xytext=(0, 10), color='white', fontsize=7, ha='center')
 
-# Delta plot
-ax1 = fig.add_subplot(gs[0])
-ax1.set_facecolor('#0d0d1a')
-ax1.axhline(0, color='white', linewidth=0.6, linestyle='--', alpha=0.4)
-ax1.fill_between(ver_dist, delta, 0,
-                 where=(delta > 0), color='#1E90FF', alpha=0.7, label='VER faster')
-ax1.fill_between(ver_dist, delta, 0,
-                 where=(delta < 0), color='#FF8C00', alpha=0.7, label='NOR faster')
-ax1.set_ylabel('Delta (s)', color='white', fontsize=9)
-ax1.tick_params(colors='white')
-ax1.legend(facecolor='#1a1a2e', labelcolor='white', fontsize=9, loc='upper right')
-ax1.set_xticklabels([])
-for spine in ax1.spines.values():
+ax.set_xlabel('Lap Number', color='white', fontsize=11)
+ax.set_ylabel('Lap Time (seconds)', color='white', fontsize=11)
+ax.tick_params(colors='white')
+ax.legend(facecolor='#1a1a2e', labelcolor='white', fontsize=10)
+for spine in ax.spines.values():
     spine.set_edgecolor('#333355')
 
-# Speed trace
-ax2 = fig.add_subplot(gs[1])
-ax2.set_facecolor('#0d0d1a')
-ax2.plot(ver_dist, ver_speed, color='#1E90FF', linewidth=1.2, label='VER Speed')
-ax2.set_ylabel('Speed (km/h)', color='white', fontsize=9)
-ax2.set_xlabel('Distance (m)', color='white', fontsize=10)
-ax2.tick_params(colors='white')
-ax2.legend(facecolor='#1a1a2e', labelcolor='white', fontsize=9)
-for spine in ax2.spines.values():
-    spine.set_edgecolor('#333355')
-
-plt.savefig('ver_nor_delta.png', dpi=150, bbox_inches='tight', facecolor='#1a1a2e')
+plt.tight_layout()
+plt.savefig('ver_lap_evolution.png', dpi=150, bbox_inches='tight', facecolor='#1a1a2e')
 print("Saved!")
 plt.show()
