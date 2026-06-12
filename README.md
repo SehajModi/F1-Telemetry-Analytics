@@ -48,11 +48,27 @@ Overlaid telemetry (speed, throttle, brake, gear) with cumulative time delta pan
 
 ## 🔍 Key Findings
 
-- VER and NOR are nearly identical through braking zones — the gap originates from micro-throttle application in the Sector 2 infield
-- Turn 1 (~600m): hardest braking event on circuit, 300 → 80 km/h in under 100m
-- Sector 2 infield (~2000–2800m): highest inter-driver differentiation zone
-- VER's fastest lap: **90.42s** — set on lap 5 of qualifying
+### Driver Delta — VER vs NOR
+- VER leads in Sector 1 (0–1000m) by up to +0.25s — stronger T1 braking commitment
+- NOR recovers and dominates Sector 2 (1500–3500m) by up to -0.85s — superior infield throttle application
+- Gap narrows in Sector 3, NOR finishes 0.6s ahead overall on this lap comparison
 
+### Braking Zone Characterisation — VER Fastest Lap
+| Zone | Distance (m) | Entry (kph) | Exit (kph) | Scrubbed (kph) | Braking Dist (m) |
+|------|-------------|-------------|------------|----------------|-----------------|
+| Z1 | 619 | 265 | 71 | 193.9 | 93.8 |
+| Z2 | 1382 | 295 | 138 | 156.9 | 98.5 |
+| Z3 | 1786 | 255 | 216 | 38.5 | 58.3 |
+| Z4 | 2109 | 258 | 90 | 168.0 | 90.1 |
+| Z5 | 2540 | 260 | 88 | 171.5 | 131.3 |
+| Z6 | 3292 | 308 | 167 | 140.8 | 102.5 |
+| Z7 | 3977 | 229 | 140 | 88.9 | 83.3 |
+| Z8 | 4764 | 265 | 137 | 128.0 | 73.0 |
+
+- **Hardest stop:** Z1 — 193.9 kph scrubbed in 93.8m (peak decel proxy: 2.07)
+- **Longest brake:** Z5 — 131.3m at ~2540m circuit distance
+- **Highest entry speed:** Z6 — 308 kph into the back straight hairpin
+- **Lightest touch:** Z3 — only 38.5 kph scrubbed, chicane transition
 ---
 
 ## 🛠️ Tech Stack
